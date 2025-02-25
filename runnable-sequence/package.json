@@ -1,0 +1,28 @@
+{
+  "name": "langchain",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/seung0708/langchain-tutorial#readme",
+  "bugs": {
+    "url": "https://github.com/seung0708/langchain-tutorial/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seung0708/langchain-tutorial.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@langchain/community": "^0.3.32",
+    "@langchain/core": "^0.3.40",
+    "@langchain/openai": "^0.4.4",
+    "@supabase/supabase-js": "^2.49.1",
+    "dotenv": "^16.4.7",
+    "gitignore": "^0.7.0"
+  }
+}

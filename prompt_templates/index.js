@@ -11,6 +11,8 @@ import { retriever } from './utils/retriever.js';
 //     progressConversation();
 // })
 
+const openAIAPIKey = process.env.OPENAI_API_KEY
+
 const llm = new ChatOpenAI({openAIAPIKey})
 
 const standaloneQuestionTemplate = 'Given a question, convert it to a standalone question. question: {question} standalone question:'
@@ -24,13 +26,9 @@ answer:`
 
 const answerPrompt = PromptTemplate.fromTemplate(answerTemplate)
 
-function combineDocuments(docs) {
-    return docs.map((doc) => doc.pageContent).join('\n\n')
-}
+const chain = standaloneQuestionPrompt.pipe(llm).pipe(new StringOutputParser()).pipe(retriever).pipe(combineDocuments).pipe(answerPrompt);
 
-const chain = standaloneQuestionPrompt.pipe(llm).pipe(new StringOutputParser()).pipe(retriever).pipe(combineDocuments);
-
-const response = await standaloneQuestionChain.invoke({
+const response = await chain.invoke({
     question: 'What are the technical requirements for running Scrimba? I only have a very old laptop which is not that powerful.'
 })
 
