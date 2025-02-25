@@ -12,7 +12,6 @@ import { retriever } from './utils/retriever.js';
 // })
 
 const openAIAPIKey = process.env.OPENAI_API_KEY
-
 const llm = new ChatOpenAI({openAIAPIKey})
 
 const standaloneQuestionTemplate = 'Given a question, convert it to a standalone question. question: {question} standalone question:'
