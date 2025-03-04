@@ -16,6 +16,8 @@
     "@supabase/supabase-js": "^2.49.1",
     "dotenv": "^16.4.7",
     "gitignore": "^0.7.0",
+    "http-server": "^14.1.1",
+    "jsdom": "^26.0.0",
     "openai": "^4.85.4"
   }
 }

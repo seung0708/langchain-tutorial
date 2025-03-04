@@ -5,11 +5,8 @@ import { ChatOpenAI } from '@langchain/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import {StringOutputParser} from "@langchain/core/output_parsers";
 import { retriever } from './utils/retriever.js';
-
-// document.addEventListener('submit', (e) => {
-//     e.preventDefault();
-//     progressConversation();
-// })
+import { combineDocuments } from './utils/combineDocuments.js'
+import {document} from './utils/jsdom.js'
 
 const openAIAPIKey = process.env.OPENAI_API_KEY
 const llm = new ChatOpenAI({openAIAPIKey})
@@ -25,18 +22,37 @@ answer:`
 
 const answerPrompt = PromptTemplate.fromTemplate(answerTemplate)
 
-const chain = standaloneQuestionPrompt.pipe(llm).pipe(new StringOutputParser()).pipe(retriever).pipe(combineDocuments).pipe(answerPrompt);
+const standaloneQuestionChain = RunnableSequence.from([standaloneQuestionPrompt, llm, new StringOutputParser()])
+const retrieverChain = RunnableSequence.from([
+    prevResult => prevResult.standalone_question, 
+    retriever, 
+    combineDocuments
+])
+const answerChain = RunnableSequence.from([answerPrompt, llm, new StringOutputParser])
 
-const response = await chain.invoke({
-    question: 'What are the technical requirements for running Scrimba? I only have a very old laptop which is not that powerful.'
-})
+const chain = RunnableSequence.from([
+    {
+        standalone_question: standaloneQuestionChain, 
+        original_input: new RunnablePassthrough()
+    },
+    {
+        context: retrieverChain, 
+        question: ({original_input}) => original_input.question
+    },
+    answerChain
+]);
 
-console.log(response)
+document.addEventListener("submit", (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
+    progressConversation()
+});
 
 async function progressConversation() {
+
     const userInput = document.getElementById('user-input')
     const chatbotConversation = document.getElementById('chatbot-conversation-container')
     const question = userInput.value
+    console.log(question)
     userInput.value = ''
 
     // add human message
@@ -45,11 +61,14 @@ async function progressConversation() {
     chatbotConversation.appendChild(newHumanSpeechBubble)
     newHumanSpeechBubble.textContent = question
     chatbotConversation.scrollTop = chatbotConversation.scrollHeight
+    const response = await chain.invoke({
+        question
+    })
 
     // add AI message
     const newAiSpeechBubble = document.createElement('div')
     newAiSpeechBubble.classList.add('speech', 'speech-ai')
     chatbotConversation.appendChild(newAiSpeechBubble)
-    newAiSpeechBubble.textContent = result
+    newAiSpeechBubble.textContent = response
     chatbotConversation.scrollTop = chatbotConversation.scrollHeight
 }
